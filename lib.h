@@ -4,10 +4,11 @@
 #include <cstdint>
 #include <vector>
 
+#include "learn.h"
+
 using namespace std;
 
-template <typename T>
-vector<T> slice(vector<T> &arr, int X, int Y);
+vector<LearnData> slice(vector<LearnData> &arr, int X, int Y);
 
 double getCost(vector<double> predictedValues, vector<double> expectedValues);
 double getCostDerivative(double predictedValue, double expectedValue);
@@ -17,10 +18,7 @@ double RandomInNormalDistribution(double mean, double standardDeviation);
 struct Parameters
 {
 	double initialLearningRate;
-	double learnRateDecay;
 	int minibatchSize;
-	double momentum;
-	double regularization;
 };
 
 class ActivationFunction
@@ -50,13 +48,8 @@ class ReLUActivation : public ActivationFunction
 	double activation(vector<double> inputs, int i);
 	double derivative(vector<double> inputs, int i);
 };
-class BinaryActivation : public ActivationFunction
-{
-	double activation(vector<double> inputs, int i);
-	double derivative(vector<double> inputs, int i);
-};
-vector<double> generateExpectedValues(int label, int outputSize);
+vector<double> generateExpectedValues(double label, int outputSize);
 vector<double> formatImage(vector<uint8_t> image);
-vector<double> convertArrToVector(double *arr, int size);
+void printImage(vector<double> image);
 
 #endif

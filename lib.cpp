@@ -7,52 +7,18 @@
 using namespace std;
 
 #include "lib.h"
+#include "learn.h"
 
 #define M_PI 3.14159265358979323846
 
-template <typename T>
-vector<T> slice(vector<T> &arr, int X, int Y)
+vector<LearnData> slice(vector<LearnData> &arr, int X, int Y)
 {
     // Starting and Ending iterators
     auto start = arr.begin() + X;
     auto end = arr.begin() + Y + 1;
 
     // To store the sliced vector
-    vector<T> result(Y - X + 1);
-
-    // Copy vector using copy function()
-    copy(start, end, result.begin());
-
-    // Return the final sliced vector
-    return result;
-}
-
-template <>
-vector<uint8_t> slice(vector<uint8_t> &arr, int X, int Y)
-{
-    // Starting and Ending iterators
-    auto start = arr.begin() + X;
-    auto end = arr.begin() + Y + 1;
-
-    // To store the sliced vector
-    vector<uint8_t> result(Y - X + 1);
-
-    // Copy vector using copy function()
-    copy(start, end, result.begin());
-
-    // Return the final sliced vector
-    return result;
-}
-
-template <>
-vector<vector<uint8_t>> slice(vector<vector<uint8_t>> &arr, int X, int Y)
-{
-    // Starting and Ending iterators
-    auto start = arr.begin() + X;
-    auto end = arr.begin() + Y + 1;
-
-    // To store the sliced vector
-    vector<vector<uint8_t>> result(Y - X + 1);
+    vector<LearnData> result(Y - X + 1);
 
     // Copy vector using copy function()
     copy(start, end, result.begin());
@@ -101,7 +67,7 @@ double SoftmaxActivation::activation(vector<double> inputs, int i)
 {
     double sum = 0;
 
-    for (int j = 0; j < inputs.size(); j++)
+    for (int j = 0; j < (int)inputs.size(); j++)
     {
         sum += exp(inputs[j]);
     }
@@ -114,7 +80,7 @@ double SoftmaxActivation::activation(vector<double> inputs, int i)
 double SoftmaxActivation::derivative(vector<double> inputs, int i)
 {
     double expSum = 0;
-    for (int j = 0; j < inputs.size(); j++)
+    for (int j = 0; j < (int)inputs.size(); j++)
     {
         expSum += exp(inputs[j]);
     }
@@ -126,13 +92,15 @@ double SoftmaxActivation::derivative(vector<double> inputs, int i)
 
 double SigmoidActivation::activation(vector<double> inputs, int i)
 {
-    return 1 / (1 + pow(exp(1), -inputs[i]));
+    return 1.0 / (1 + exp(-inputs[i]));
 }
 
 double SigmoidActivation::derivative(vector<double> inputs, int i)
 {
-    return inputs[i] * (1 - inputs[i]);
+    double a = activation(inputs, i);
+    return a * (1 - a);
 }
+
 const double reluAlpha = 0.1;
 double ReLUActivation::activation(vector<double> inputs, int i)
 {
@@ -157,30 +125,6 @@ double ReLUActivation::derivative(vector<double> inputs, int i)
         return reluAlpha;
     }
 }
-double BinaryActivation::activation(vector<double> inputs, int i)
-{
-    if (inputs[i] > 0)
-    {
-        return 1;
-    }
-    else
-    {
-        return -1;
-    }
-}
-
-double BinaryActivation::derivative(vector<double> inputs, int i)
-{
-    if (inputs[i] > 0)
-    {
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
-}
-
 double RandomInNormalDistribution(double mean, double standardDeviation)
 {
     double x1 = 1 - ((double)rand() / (RAND_MAX));
@@ -207,7 +151,7 @@ void printImage(vector<double> image)
     cout << "\n";
 }
 
-vector<double> generateExpectedValues(int label, int outputSize)
+vector<double> generateExpectedValues(double label, int outputSize)
 {
     vector<double> expectedOutputs = {};
 
@@ -235,16 +179,4 @@ vector<double> formatImage(vector<uint8_t> image)
     }
 
     return formattedImage;
-}
-
-vector<double> convertArrToVector(double *arr, int size)
-{
-    vector<double> vec = {};
-
-    for (int i = 0; i < size; i++)
-    {
-        vec.push_back(arr[i]);
-    }
-
-    return vec;
 }

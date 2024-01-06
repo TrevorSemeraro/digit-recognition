@@ -30,7 +30,7 @@ public:
     void calculateOutputLayerNodeValues(LayerLearningData*& learningData, vector<double> expectedOutputs);
     void calculateHiddenLayerNodeValues(LayerLearningData*& learningData, Layer *prevLayer, LayerLearningData*& prevLayerNodeValues);
     void updateGradients(LayerLearningData*& learningData);
-    void ApplyGradients(double learnRate, double regularization, double momentum);
+    void ApplyGradients(double learnRate);
 };
 
 #endif

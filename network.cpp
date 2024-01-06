@@ -17,8 +17,9 @@ Network::Network(vector<int> layerSizes, ActivationFunction *hiddenLayerActivati
 {
     // Providing a seed value
     srand((unsigned)time(NULL));
-
-    for (unsigned int i = 0; i < layerSizes.size() - 1; i++)
+    NetworkLearningData *learningData = new NetworkLearningData();
+    
+    for (int i = 0; i < (int)layerSizes.size() - 1; i++)
     {
         if (i == layerSizes.size() - 2)
         {
@@ -31,9 +32,32 @@ Network::Network(vector<int> layerSizes, ActivationFunction *hiddenLayerActivati
             Layer *newLayer = new Layer(layerSizes[i], layerSizes[i + 1], hiddenLayerActivationFunction);
             layers.push_back(*newLayer);
         }
-    }
-}
 
+        LayerLearningData *currentLayer = new LayerLearningData(layers[i]);
+        learningData->layerData.push_back(*currentLayer);
+    }
+    this->learningData = learningData;
+}
+int Network::train(vector<LearnData> data_batch, double learnRate)
+{
+    int num_correct = 0;
+    for (int i = 0; i < (int)data_batch.size(); i++)
+    {
+        bool output = updateGradients(data_batch[i], learningData);
+        if (output)
+        {
+            num_correct++;
+        }
+    }
+
+    for (int i = 0; i < (int)layers.size(); i++)
+    {
+        Layer *currentLayer = &layers[i];
+        currentLayer->ApplyGradients(learnRate / data_batch.size());
+    }
+
+    return num_correct;
+}
 double Network::classify(vector<double> inputs)
 {
     vector<double> outputs = CalculateOutputs(inputs);
@@ -66,118 +90,69 @@ vector<double> Network::CalculateOutputs(vector<double> inputs)
     return output;
 }
 
-bool Network::updateGradients(vector<double> image, double label, NetworkLearningData *learningData)
+bool Network::updateGradients(LearnData data, NetworkLearningData *learningData)
 {
     // Feed data through nueral network to recieve output
-    vector<double> input = image;
+    vector<double> input = data.image;
 
     for (unsigned int i = 0; i < layers.size(); i++)
     {
         Layer *currentLayer = &layers[i];
-        LayerLearningData *currentLayerData = learningData->layerData[i];
+        LayerLearningData *ld = &learningData->layerData[i];
 
-        input = currentLayer->calculateOutputs(input, currentLayerData);
+        input = currentLayer->calculateOutputs(input, ld);
     }
 
-    vector<double> output = input;
-    double maxOutputNodeValue = 0;
-    double maxOutputNodeIndex = 0;
-    for(int i = 0; i < output.size(); i++)
-    {
-        if(output[i] > maxOutputNodeValue)
-        {
-            maxOutputNodeValue = output[i];
-            maxOutputNodeIndex = i;
-        }
-    }
-
-    // Backpropagate through network to calculate cost gradients
     int outputLayerIndex = layers.size() - 1;
-
     Layer *outputLayer = &layers[outputLayerIndex];
-    LayerLearningData *outputLayerData = learningData->layerData[outputLayerIndex];
+    LayerLearningData *outputLayerData = &learningData->layerData[outputLayerIndex];
 
-    vector<double> expectedOutputs = generateExpectedValues((int)label, outputLayer->nodes_out);
-
-    outputLayer->calculateOutputLayerNodeValues(outputLayerData, expectedOutputs);
+    outputLayer->calculateOutputLayerNodeValues(outputLayerData, data.expectedOutputs);
     outputLayer->updateGradients(outputLayerData);
 
     for (int i = outputLayerIndex - 1; i >= 0; i--)
     {
         Layer *currentLayer = &layers[i];
-        LayerLearningData *currentLayerData = learningData->layerData[i];
+        LayerLearningData *currentLayerData = &learningData->layerData[i];
 
         Layer *nextLayer = &layers[i + 1];
-        LayerLearningData *nextLayerData = learningData->layerData[i + 1];
+        LayerLearningData *nextLayerData = &learningData->layerData[i + 1];
 
         currentLayer->calculateHiddenLayerNodeValues(currentLayerData, nextLayer, nextLayerData);
         currentLayer->updateGradients(currentLayerData);
     }
-    // cout << maxOutputNodeIndex << " " << maxOutputNodeValue << " " << label << "\n";
-    return (maxOutputNodeIndex == label);
-}
 
-int Network::train(vector<vector<uint8_t>> batch_images, vector<uint8_t> batch_labels, double learnRate, double regularization, double momentum)
-{
-    if (batch_images.size() != batch_labels.size())
+    vector<double> output = input;
+    double maxOutputNodeValue = 0;
+    double maxOutputNodeIndex = 0;
+    for (int i = 0; i < (int)output.size(); i++)
     {
-        cout << "Training batch sizes do not match.\n";
-        return 0;
-    }
-
-    NetworkLearningData *learningData = new NetworkLearningData(layers.size());
-    for (int i = 0; i < (int)layers.size(); i++)
-    {
-        LayerLearningData *layerData = new LayerLearningData(layers[i]);
-        learningData->layerData[i] = layerData;
-    }
-
-    int num_correct = 0;
-    for (int i = 0; i < (int)batch_images.size(); i++)
-    {
-        vector<double> formattedInput = formatImage(batch_images[i]);
-        bool output = updateGradients(formattedInput, (double)batch_labels[i], learningData);
-        if(output) {
-            num_correct++;
+        if (output[i] > maxOutputNodeValue)
+        {
+            maxOutputNodeValue = output[i];
+            maxOutputNodeIndex = i;
         }
     }
-
-    // Apply Gradients
-    for (int i = 0; i < (int)layers.size(); i++)
-    {
-        Layer *currentLayer = &layers[i];
-        currentLayer->ApplyGradients(learnRate / batch_labels.size(), regularization, momentum);
-    }
-
-    return num_correct;
+    return (maxOutputNodeIndex == data.label);
 }
 
-double Network::test(vector<vector<uint8_t>> batch_images, vector<uint8_t> batch_labels)
+double Network::test(vector<LearnData> test_data_batch)
 {
-    if (batch_images.size() != batch_labels.size())
-    {
-        cout << "Training batch sizes do not match.\n";
-        return 0;
-    }
-
-    double sample_size = batch_images.size();
+    double sample_size = test_data_batch.size();
     double correct = 0;
 
     for (int i = 0; i < sample_size; i++)
     {
+        double output = classify(test_data_batch[i].image);
 
-        vector<double> formattedImage = {};
-        vector<uint8_t> image = batch_images[i];
-
-        for (unsigned int i = 0; i < image.size(); i++)
-        {
-            formattedImage.push_back((double)image[i] / 255);
-        }
-        double output = classify(formattedImage);
-
-        if (output == (int)batch_labels[i])
+        if (output == test_data_batch[i].label)
         {
             correct++;
+        }
+        else
+        {
+            // printImage(formattedImage);
+            // cout << "Expected: " << (int)batch_labels[i] << " Recieved: " << output << "\n";
         }
     }
 

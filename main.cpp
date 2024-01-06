@@ -27,14 +27,15 @@ int main(int argc, char *argv[])
     std::cout << "# of test images = " << dataset.test_images.size() << std::endl;
     std::cout << "# of test labels = " << dataset.test_labels.size() << std::endl;
 
+    vector<LearnData> training_data = createLearnData(dataset.training_images, dataset.training_labels);
+    vector<LearnData> testing_data = createLearnData(dataset.test_images, dataset.test_labels);
+
     Parameters parameters = {
         0.05,
-        0.09,
-        32,
-        0.9,
-        0.1};
+        64,
+    };
 
-    ActivationFunction *sigmoid = new ReLUActivation();
+    ActivationFunction *hiddenActivation = new SigmoidActivation();
     ActivationFunction *softmax = new SoftmaxActivation();
 
     int image_size = 28;
@@ -44,18 +45,19 @@ int main(int argc, char *argv[])
     vector<int> layerSizes = {input_nodes, 100, output_nodes};
 
     cout << "Building Nueral Network of size (";
-    for(int i = 0; i < layerSizes.size(); i++) {
+    for (int i = 0; i < (int)layerSizes.size(); i++)
+    {
         cout << layerSizes[i] << " ";
     }
     cout << ")\n";
 
-    Network *network = new Network(layerSizes, sigmoid, softmax);
+    Network *network = new Network(layerSizes, hiddenActivation, softmax);
 
     int epochs = 25;
-    // int training_batches = (dataset.training_images.size() / parameters.minibatchSize) / 2;
-    int training_batches = 101;
-    
-    int test_size = 250;
+    // int training_batches = (dataset.training_images.size() / parameters.minibatchSize);
+    int training_batches = 100;
+
+    int test_size = dataset.test_labels.size() / epochs;
     int test_index = 0;
 
     double currentLearningRate = parameters.initialLearningRate;
@@ -70,50 +72,49 @@ int main(int argc, char *argv[])
         std::seed_seq seed{r(), r(), r(), r(), r(), r(), r(), r()};
 
         std::mt19937 eng1(seed);
-        auto eng2 = eng1;
 
-        shuffle(begin(dataset.training_images), end(dataset.training_images), eng1);
-        shuffle(begin(dataset.training_labels), end(dataset.training_labels), eng2);
+        shuffle(begin(training_data), end(training_data), eng1);
+
+        cout << "Shuffling training data\n";
 
         double sum_correct = 0;
         for (int mini_batch_index = 0; mini_batch_index < training_batches; mini_batch_index++)
         {
+
             int start_index = mini_batch_index * parameters.minibatchSize;
             int end_index = (mini_batch_index + 1) * parameters.minibatchSize;
 
-            vector<vector<uint8_t>> batch_images = slice(dataset.training_images, start_index, end_index);
-            vector<uint8_t> batch_labels = slice(dataset.training_labels, start_index, end_index);
+            vector<LearnData> data_batch = slice(training_data, start_index, end_index);
 
             int num_correct = network->train(
-                batch_images,
-                batch_labels,
-                currentLearningRate,
-                parameters.regularization,
-                parameters.momentum);
+                data_batch,
+                currentLearningRate);
+
             sum_correct += num_correct;
 
-            if(mini_batch_index % 25 == 0) {
-                // Makes sure the network is working / tells us how if its stuck
+            if (mini_batch_index % (training_batches / 4) == 0)
+            {
                 cout << "Batch " << mini_batch_index << "\n";
+                cout << "Label: " << data_batch[0].label << "\n";
+                cout << "Training: " << (double)num_correct / (parameters.minibatchSize) << "\n";
             }
         }
         cout << "Epoch Training " << epoch_index << ": " << sum_correct / (training_batches * parameters.minibatchSize) << "\n";
 
-        currentLearningRate = (1.0 / (1.0 + (parameters.learnRateDecay * epoch_index))) * parameters.initialLearningRate;
+        currentLearningRate = (1.0 / (1 + 0.5 * epoch_index));
 
         int test_start_index = test_size * test_index;
         int test_end_index = test_size * (test_index + 1);
         // test_index++;
 
-        vector<vector<uint8_t>> test_images = slice(dataset.test_images, test_start_index, test_end_index);
-        vector<uint8_t> test_labels = slice(dataset.test_labels, test_start_index, test_end_index);
+        vector<LearnData> test_data_batch = slice(testing_data, test_start_index, test_end_index);
 
-        double testAccuracy = network->test(test_images, test_labels);
+        double testAccuracy = network->test(test_data_batch);
 
-        cout << "Testing " << epoch_index << ", " << testAccuracy << "\n";
+        cout << "Test Accuracy " << testAccuracy << "\n";
+
+        saveNetwork(network, "network.txt");
     }
-
-    saveNetwork(network, "network.txt");
 
     return 0;
 }

@@ -14,16 +14,17 @@ class Network
 {
 public:
     vector<Layer> layers;
+    NetworkLearningData *learningData;
 
     Network(vector<int> layerSizes, ActivationFunction *hiddenLayerActivationFunction, ActivationFunction *outputLayerActivationFunction);
 
-    int train(vector<vector<uint8_t>> batch_images, vector<uint8_t> batch_labels, double learnRate, double regularization, double momentum);
+    int train(vector<LearnData> data_batch, double learnRate);
 
     vector<double> CalculateOutputs(vector<double> inputs);
-    bool updateGradients(vector<double> image, double label, NetworkLearningData *learningData);
+    bool updateGradients(LearnData data, NetworkLearningData *learningData);
 
     double classify(vector<double> inputs);
-    double test(vector<vector<uint8_t>> batch_images, vector<uint8_t> batch_labels);
+    double test(vector<LearnData> test_data_batch);
 };
 
 #endif

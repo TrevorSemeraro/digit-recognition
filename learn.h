@@ -7,23 +7,31 @@ using namespace std;
 
 class Layer;
 
+struct LearnData {
+    vector<double> image;
+    vector<double> expectedOutputs;
+    double label;
+};
+
+vector<LearnData> createLearnData(vector<vector<uint8_t>> images, vector<uint8_t> labels);
+
 class LayerLearningData {
     public:
         double nodes_in;
         double nodes_out;
-        double *inputs;
-        double *weightedInputs;
-        double *activations;
-        double *nodeValues;
+        vector<double> inputs;
+        vector<double> weightedInputs;
+        vector<double> activations;
+        vector<double> nodeValues;
 
         LayerLearningData(Layer layer);
 };
 
 class NetworkLearningData {
     public:
-        LayerLearningData **layerData;
+        vector<LayerLearningData> layerData;
 
-        NetworkLearningData(int len);
+        NetworkLearningData();
 };
 
 #endif

@@ -36,7 +36,6 @@ void Layer::randomizeData()
 
         for (int j = 0; j < nodes_out; j++)
         {
-            // double randomWeight = RandomInNormalDistribution(0.5, 0.5) / sqrt(nodes_in);
             double randomWeight = RandomInNormalDistribution(0, 1) / sqrt(nodes_in);
 
             if (isnan(randomWeight) || isinf(randomWeight))
@@ -67,7 +66,6 @@ vector<double> Layer::calculateOutputs(vector<double> inputs, LayerLearningData*
     for (int i = 0; i < nodes_out; i++)
     {
         double weightedInput = biases[i];
-        // cout << "Bias: (" << i << ")" << biases[i] << "\n";
 
         for (int j = 0; j < nodes_in; j++)
         {
@@ -79,7 +77,7 @@ vector<double> Layer::calculateOutputs(vector<double> inputs, LayerLearningData*
         weighted_inputs.push_back(weightedInput);
     }
 
-    for(int i = 0; i < weighted_inputs.size(); i++)
+    for(int i = 0; i < (int) weighted_inputs.size(); i++)
     {
         double outputValue = activationFunction->activation(weighted_inputs, i);
 
@@ -109,7 +107,7 @@ vector<double> Layer::calculateOutputs(vector<double> inputs)
 
     vector<double> activation_values = {};
 
-    for(int i = 0; i < weighted_inputs.size(); i++)
+    for(int i = 0; i < (int) weighted_inputs.size(); i++)
     {
         double outputValue = activationFunction->activation(weighted_inputs, i);
         activation_values.push_back(outputValue);
@@ -120,80 +118,71 @@ vector<double> Layer::calculateOutputs(vector<double> inputs)
 
 void Layer::calculateOutputLayerNodeValues(LayerLearningData*& learningData, vector<double> expectedOutputs)
 {
-    int length = learningData->nodes_out;
-
-    for (int i = 0; i < length; i++)
+    for (int i = 0; i < learningData->nodes_out; i++)
     {
         double costDerivative = getCostDerivative(learningData->activations[i], expectedOutputs[i]);
-
-        vector<double> inputs = convertArrToVector(learningData->inputs, learningData->nodes_in);
-        double activationDerivative = activationFunction->derivative(inputs, i);
+        double activationDerivative = activationFunction->derivative(learningData->inputs, i);
 
         learningData->nodeValues[i] = costDerivative * activationDerivative;
-
     }
-
-    return;
 }
 void Layer::calculateHiddenLayerNodeValues(LayerLearningData*& learningData, Layer* prevLayer, LayerLearningData*& prevLayerData)
 {
     for (int newNodeIndex = 0; newNodeIndex < nodes_out; newNodeIndex++)
     {
         double newNodeValue = 0;
-
         for (int oldNodeIndex = 0; oldNodeIndex < prevLayerData->nodes_out; oldNodeIndex++)
         {
             double weightedInputDerivative = prevLayer->weights[newNodeIndex][oldNodeIndex];
-
             newNodeValue += weightedInputDerivative * prevLayerData->nodeValues[oldNodeIndex];
         }
-
-        vector<double> inputs = convertArrToVector(learningData->inputs, learningData->nodes_in);
-        
-        newNodeValue *= activationFunction->derivative(inputs, newNodeIndex);
+        newNodeValue *= activationFunction->derivative(learningData->inputs, newNodeIndex);
         learningData->nodeValues[newNodeIndex] = newNodeValue;
     }
 }
 
 void Layer::updateGradients(LayerLearningData*& learningData)
 {
-    for (int i = 0; i < nodes_out; i++)
+    for (int nodeOut = 0; nodeOut < nodes_out; nodeOut++)
     {
-        double nodeValue = learningData->nodeValues[i];
+        double nodeValue = learningData->nodeValues[nodeOut];
 
-        for (int j = 0; j < nodes_in; j++)
+        for (int nodeIn = 0; nodeIn < nodes_in; nodeIn++)
         {
-            double deriveCostWRTWeight = nodeValue * learningData->inputs[j];
+            double deriveCostWRTWeight = learningData->inputs[nodeIn] * nodeValue;
 
-            cost_gradient_weights[j][i] += deriveCostWRTWeight;
+            cost_gradient_weights[nodeIn][nodeOut] += deriveCostWRTWeight;
         }
 
-        cost_gradient_biases[i] += nodeValue;
+        cost_gradient_biases[nodeOut] += nodeValue;
     }
 }
 
-void Layer::ApplyGradients(double learnRate, double regularization, double momentum)
+void Layer::ApplyGradients(double learnRate)
 {
-    double weightDecay = (1 - regularization * learnRate);
-
     for (int node_in_index = 0; node_in_index < nodes_in; node_in_index++)
     {
         for (int node_out_index = 0; node_out_index < nodes_out; node_out_index++)
         {
-            double weight = weights[node_in_index][node_out_index];
-            double velocity = weight_velocity[node_in_index][node_out_index] * momentum - cost_gradient_weights[node_in_index][node_out_index] * learnRate;
-            weight_velocity[node_in_index][node_out_index] = velocity;
+            // double weight = weights[node_in_index][node_out_index];
+            // double velocity = weight_velocity[node_in_index][node_out_index] * momentum - cost_gradient_weights[node_in_index][node_out_index] * learnRate;
+            // weight_velocity[node_in_index][node_out_index] = velocity;
 
-            weights[node_in_index][node_out_index] = weight * weightDecay + velocity;
+            // weights[node_in_index][node_out_index] = weight * weightDecay + velocity;
+            
+            // Trial code
+            weights[node_in_index][node_out_index] += -cost_gradient_weights[node_in_index][node_out_index] * learnRate;
+            
             cost_gradient_weights[node_in_index][node_out_index] = 0;
         }
     }
 
     for (int i = 0; i < nodes_out; i++)
     {
-        double velocity = bias_velocity[i] * momentum - cost_gradient_biases[i] * learnRate;
-        bias_velocity[i] = velocity;
-        biases[i] += velocity;
+        // double velocity = bias_velocity[i] * momentum - cost_gradient_biases[i] * learnRate;
+        // bias_velocity[i] = velocity;
+        biases[i] += -cost_gradient_biases[i] * learnRate;
+        
         cost_gradient_biases[i] = 0;
     }
 }
