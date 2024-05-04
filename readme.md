@@ -1,29 +1,18 @@
-# Nueral Network
+# Built with
 
-## Background
+- SFML (and SFML boilerplate)
+- mnist
+- nlohmann/json
 
-Handwritten number classification trained on the [MNIST DATASET](https://en.wikipedia.org/wiki/MNIST_database)
+# Example
 
-A nueral network, built from scratch in c+.
-Houses 3 layers, with 784 inputs, 128 hidden layer, and 10 output nuerons respectively.
+This example shows the 95% test accuracy neural network classifying random unseen digits from the dataset.
 
-Test sample classification rate of 80%.
+<video width="320" height="240" controls>
+  <source src="example.mp4" type="video/mp4">
+</video>
 
-## Tools and Software
+# References
 
-Built with c++, on windows 11, with the GNU compiler (g++).
-Uses the c++ MNIST library for reading images and labels from database.
-
-## Test Samples
-
-
-## Save/Load Functionality
-
-Saves data to ```network.txt```, of data partaining:
-
-    - number of layers
-    - nuerons per layer
-    - weights per connection
-    - biases per nueron
-
-Which can be loaded in after training time to apply the trained model to classify external sources.
+https://github.com/SebLague/Neural-Network-Experiments
+https://optimization.cbe.cornell.edu/index.php?title=Momentum
