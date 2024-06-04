@@ -7,9 +7,9 @@
 
 using namespace std;
 
-#include "learn.h"
-#include "layer.h"
-#include "lib.h"
+#include "../include/learn.h"
+#include "../include/layer.h"
+#include "../include/lib.h"
 
 Layer::Layer(int _nodes_in, int _nodes_out, ActivationFunction* _activationFunction)
 {

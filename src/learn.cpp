@@ -6,9 +6,9 @@ using namespace std;
 #include <stdint.h>
 #include <iostream>
 
-#include "learn.h"
-#include "layer.h"
-#include "lib.h"
+#include "../include/learn.h"
+#include "../include/layer.h"
+#include "../include/lib.h"
 
 vector<LearnData> createLearnData(vector<vector<uint8_t>> images, vector<uint8_t> labels) {
     vector<LearnData> data;

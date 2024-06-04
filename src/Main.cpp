@@ -5,12 +5,13 @@
 #include <random>
 #include <vector>
 
+#include "../include/activationFunctions.h"
+#include "../include/draw.h"
+#include "../include/lib.h"
+#include "../include/network.h"
+#include "../include/save.h"
 #include "../lib/mnist/mnist_reader.hpp"
 #include "Platform/Platform.hpp"
-#include "draw.h"
-#include "lib.h"
-#include "network.h"
-#include "save.h"
 
 int main()
 {

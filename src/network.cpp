@@ -7,11 +7,11 @@
 
 using namespace std;
 
-#include "layer.h"
-#include "learn.h"
-#include "lib.h"
+#include "../include/layer.h"
+#include "../include/learn.h"
+#include "../include/lib.h"
 #include "mnist/mnist_reader.hpp"
-#include "network.h"
+#include "../include/network.h"
 
 Network::Network(vector<int> layerSizes, ActivationFunction *hiddenLayerActivationFunction, ActivationFunction *outputLayerActivationFunction)
 {

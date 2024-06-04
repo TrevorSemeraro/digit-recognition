@@ -1,9 +1,8 @@
-#include "draw.h"
-
 #include <SFML/Graphics.hpp>
 #include <vector>
 
-#include "network.h"
+#include "../include/draw.h"
+#include "../include/network.h"
 
 void renderNodes(sf::RenderWindow& window, Network* network)
 {

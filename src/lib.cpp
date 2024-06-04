@@ -6,8 +6,8 @@
 
 using namespace std;
 
-#include "lib.h"
-#include "learn.h"
+#include "../include/lib.h"
+#include "../include/learn.h"
 
 #define M_PI 3.14159265358979323846
 
@@ -30,106 +30,6 @@ vector<LearnData> slice(vector<LearnData> &arr, int X, int Y)
 
     // Return the final sliced vector
     return result;
-}
-
-double getCost(vector<double> predictedValues, vector<double> expectedValues)
-{
-    double cost = 0;
-
-    int n = predictedValues.size();
-
-    if (predictedValues.size() != expectedValues.size())
-    {
-        cout << predictedValues.size() << " " << expectedValues.size() << "\n";
-        throw "Predicted Values length does not match Expected Values length";
-    }
-
-    for (int i = 0; i < n; i++)
-    {
-        double x = predictedValues[i];
-        double y = expectedValues[i];
-
-        double v = (y == 1) ? -log(x) : -log(1 - x);
-        cost += isnan(v) ? 0 : v;
-    }
-
-    return cost;
-}
-
-double getCostDerivative(double predictedValue, double expectedValue)
-{
-    double x = predictedValue;
-    double y = expectedValue;
-
-    if (x == 0 || x == 1)
-    {
-        return 0;
-    }
-
-    return (-x + y) / (x * (x - 1));
-}
-
-double SoftmaxActivation::activation(vector<double> inputs, int i)
-{
-    double sum = 0;
-
-    for (int j = 0; j < (int)inputs.size(); j++)
-    {
-        sum += exp(inputs[j]);
-    }
-
-    double res = exp(inputs[i]) / sum;
-
-    return res;
-}
-
-double SoftmaxActivation::derivative(vector<double> inputs, int i)
-{
-    double expSum = 0;
-    for (int j = 0; j < (int)inputs.size(); j++)
-    {
-        expSum += exp(inputs[j]);
-    }
-
-    double ex = exp(inputs[i]);
-
-    return (ex * expSum - ex * ex) / (expSum * expSum);
-}
-
-double SigmoidActivation::activation(vector<double> inputs, int i)
-{
-    return 1.0 / (1 + exp(-inputs[i]));
-}
-
-double SigmoidActivation::derivative(vector<double> inputs, int i)
-{
-    double a = activation(inputs, i);
-    return a * (1 - a);
-}
-
-const double reluAlpha = 0.1;
-double ReLUActivation::activation(vector<double> inputs, int i)
-{
-    if (inputs[i] > 0)
-    {
-        return inputs[i];
-    }
-    else
-    {
-        return reluAlpha * inputs[i];
-    }
-}
-
-double ReLUActivation::derivative(vector<double> inputs, int i)
-{
-    if (inputs[i] > 0)
-    {
-        return 1;
-    }
-    else
-    {
-        return reluAlpha;
-    }
 }
 double RandomInNormalDistribution(double mean, double standardDeviation)
 {
@@ -185,4 +85,44 @@ vector<double> formatImage(vector<uint8_t> image)
     }
 
     return formattedImage;
+}
+#include <vector>
+
+using namespace std;
+
+double getCost(vector<double> predictedValues, vector<double> expectedValues)
+{
+    double cost = 0;
+
+    int n = predictedValues.size();
+
+    if (predictedValues.size() != expectedValues.size())
+    {
+        cout << predictedValues.size() << " " << expectedValues.size() << "\n";
+        throw "Predicted Values length does not match Expected Values length";
+    }
+
+    for (int i = 0; i < n; i++)
+    {
+        double x = predictedValues[i];
+        double y = expectedValues[i];
+
+        double v = (y == 1) ? -log(x) : -log(1 - x);
+        cost += isnan(v) ? 0 : v;
+    }
+
+    return cost;
+}
+
+double getCostDerivative(double predictedValue, double expectedValue)
+{
+    double x = predictedValue;
+    double y = expectedValue;
+
+    if (x == 0 || x == 1)
+    {
+        return 0;
+    }
+
+    return (-x + y) / (x * (x - 1));
 }

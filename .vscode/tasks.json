@@ -5,7 +5,7 @@
 	"windows": {
 		"options": {
 			"shell": {
-				"executable": "gitbash.exe", // change to bash.exe
+				"executable": "bash.exe", // change to bash.exe
 			}
 		}
 	},

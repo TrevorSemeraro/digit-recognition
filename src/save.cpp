@@ -1,10 +1,11 @@
-#include "save.h"
 
 #include <fstream>
 #include <iostream>
 
-#include "network.h"
 #include "nlohmann/json.hpp"
+
+#include "../include/save.h"
+#include "../include/network.h"
 
 using json = nlohmann::json;
 

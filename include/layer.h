@@ -2,8 +2,9 @@
 #define LAYER_H
 
 #include <vector>
-#include "learn.h"
-#include "lib.h"
+#include "../include/learn.h"
+#include "../include/lib.h"
+#include "../include/activationFunctions.h"
 
 using namespace std;
 
