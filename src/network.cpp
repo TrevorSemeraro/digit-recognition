@@ -167,3 +167,18 @@ double Network::test(vector<LearnData> test_data_batch)
   double accuracy = (double)correct / (double)sample_size;
   return accuracy;
 }
+
+
+#include <emscripten/emscripten.h>
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+#else
+#define EXTERN
+#endif
+
+EMSCRIPTEN_BINDINGS(my_class_example) {
+    class_<Network>("Network")
+        .constructor<vector<int> layerSizes, ActivationFunction *hiddenLayerActivationFunction, ActivationFunction *outputLayerActivationFunction>()
+        .function("classify", &Network::classify)
+        ;

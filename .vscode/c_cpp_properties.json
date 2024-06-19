@@ -9,7 +9,8 @@
 				"${workspaceFolder}/test",
 				"~/SFML-2.5.1/include",
 				"/usr/local/include/**",
-				"/usr/include/**"
+				"/usr/include/**",
+				"emcmake "
 			],
 			"defines": [
 				"_DEBUG"
