@@ -1,16 +1,12 @@
+Implemented a nueral network model in c++ with 3 layers  of 784, 128, and 10 nodes respectively
+Experiemented linking libraries such as nlohmann/json to easily interact with JSON files.
+Achieved 95\% classification accurary on test samples on MNIST dataset.
+
 # Built with
 
-- SFML (and SFML boilerplate)
+- SFML
 - mnist
 - nlohmann/json
-
-# Example
-
-This example shows the 95% test accuracy neural network classifying random unseen digits from the dataset.
-
-<video width="320" height="240" controls>
-  <source src="example.mp4" type="video/mp4">
-</video>
 
 # References
 
