@@ -8,7 +8,7 @@ Achieved 95\% classification accurary on test samples on MNIST dataset.
 - mnist
 - nlohmann/json
 
-![](https://github.com/TrevorSemeraro/digit-recognition/blob/master/example.mp4)
+[example.webm](https://github.com/user-attachments/assets/4bb8027f-d562-4014-84fb-1eda1e0a9367)
 
 # References
 
